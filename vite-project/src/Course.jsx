@@ -69,7 +69,7 @@ function UpdateCard() {
         <div style={{padding: 20}}>
             <Typography style={{marginBottom: 10}}>Update course details</Typography>
             <TextField
-                value={null}
+                
                 style={{marginBottom: 10}}
                 onChange={(e) => {
                     setTitle(e.target.value)

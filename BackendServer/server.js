@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const cors = require('cors')
 const app = express();
+require('dotenv').config();
 
 
 app.use(express.json());
@@ -50,8 +51,8 @@ const authenticateJwt = (req,res,next) => {
   }
 };
 
-mongoose.connect('mongodb+srv://vivikth21:vanivivikth2004@cluster0.evrm4my.mongodb.net/',{dbName: "courses" });
-// Admin routes
+mongoose.connect(process.env.MONGODB_URI,{dbName: "courses" });
+
 app.post('/admin/signup',async (req, res) => {
     const { username, password } = req.body;
     function callback(admin) {
@@ -71,7 +72,6 @@ app.post('/admin/signup',async (req, res) => {
 });
 
 app.post('/admin/login', async (req, res) => {
-  // logic to log in admin
   const {username,password} = req.headers;
   const findAdmin = await Admin.findOne({username,password});
   if(findAdmin){
@@ -84,14 +84,14 @@ app.post('/admin/login', async (req, res) => {
 });
 
 app.post('/admin/courses',authenticateJwt,async (req, res) => {
-  // logic to create a course
+
      const course = new Course(req.body);
      await course.save();
      res.json({message: "New Course has been added",courseID: course.id});
 });
 
 app.put('/admin/courses/:courseId',authenticateJwt,async (req, res) => {
-  // logic to edit a course
+
   const objID = req.params.courseId;
   const findCourse = await Course.findByIdAndUpdate(objID,req.body,{new: true});
   if(findCourse){
@@ -104,14 +104,12 @@ app.put('/admin/courses/:courseId',authenticateJwt,async (req, res) => {
 });
 
 app.get('/admin/courses',authenticateJwt,async (req, res) => {
-  // logic to get all courses
   const courses = await Course.find({});
   res.send({courses});
 });
 
 // User routes
 app.post('/users/signup', async (req, res) => {
-  // logic to sign up user
   const {username,password} = req.body;
   const findUser = await User.findOne({username});
   if(findUser){
@@ -136,13 +134,11 @@ app.post('/users/login', async (req, res) => {
 });
 
 app.get('/users/courses',authenticateJwt, async (req, res) => {
-  // logic to list all courses
   const courses = await Course.find({published:true});
   res.json({courses});
 });
 
 app.post('/users/courses/:courseId',authenticateJwt, async (req, res) => {
-  // logic to purchase a course
   const course = await Course.findById(req.params.courseId);
   console.log(course);
   if(course){
@@ -163,7 +159,6 @@ app.post('/users/courses/:courseId',authenticateJwt, async (req, res) => {
 });
 
 app.get('/users/purchasedCourses',authenticateJwt,async (req, res) => {
-  // logic to view purchased courses
   const purchase = await User.findOne({username:req.user.username}).populate('purchasedCourses');
   if(purchase){
     res.json({PurchasedCourses: purchase.purchasedCourses || []});
